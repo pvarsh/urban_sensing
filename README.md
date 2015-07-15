@@ -33,3 +33,14 @@ cd /home/pi/logs
 ```
 
 it drops me off in the `~/logs` directory.
+
+### Color git output
+`git config --global color.ui auto`
+
+### Install vim (so much better than vi)
+From this text editors [doc](https://www.raspberrypi.org/documentation/linux/usage/text-editors.md):
+`sudo apt-get install vim`
+
+### Vim configuration
+This [gist](https://gist.github.com/pvarsh/4e8a9c2bb1ef8d361894) has my `.vimrc` file. Place it in your `home` folder to automatically set vim to highlight syntax, set tab to 4 spaces and convert tabs to spaces. It also highlights lines longer than 79 characters to keep you PEP8 compliant.
+
