@@ -7,7 +7,12 @@ Urban sensing class team project
 - Juan Medina
 - Peter Varshavsky
 
-# Notes on RPi setup
+## Button IO
+
+Using [this](http://razzpisampler.oreilly.com/ch07.html) Raspberry Pi Cookbook tutorial. See [this image](http://www.megaleecher.net/sites/default/files/images/raspberry-pi-rev2-gpio-pinout.jpg) for Raspberry Pi 2 pin layout.
+
+
+## Notes on RPi setup
 
 ### SSH Agent forwarding
 Add this to your `~/.ssh/config` to forward your SSH Agent to your RPi. This allows you to ssh into GitHub and other servers using your laptop's private keys without storing them on RPi.
