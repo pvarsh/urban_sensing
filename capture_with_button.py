@@ -1,7 +1,9 @@
+import datetime
+import os
 import time
 
 import picamera
-import RPi.GPIO as GPIO
+from RPi import GPIO
 
 
 # set some constants
@@ -16,24 +18,6 @@ def cleanup_and_raise(exc):
     GPIO.cleanup()
     raise exc
 
-def main_():
-    GPIO.setmode(GPIO.BCM)
-    
-    GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    GPIO.setup(LED_PIN, GPIO.OUT)
-    
-    prev_input_state = GPIO.input(BUTTON_PIN)
-    while True:
-        input_state = GPIO.input(BUTTON_PIN)
-        if input_state != prev_input_state:
-            print("Button pressed")
-            if input_state == 1:
-                GPIO.output(LED_PIN, True)
-            else:
-                GPIO.output(LED_PIN, False)
-            prev_input_state = input_state
-        time.sleep(0.05)
-
 def setup_GPIO():
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -44,19 +28,26 @@ def main():
     setup_GPIO()
    
     while True:
-        
+       
+        # wait for button press
         GPIO.wait_for_edge(BUTTON_PIN, GPIO.BOTH)
+        
+        # get time for time signatures. another way to do that would be with
+        # {counter} and {timestamp} formats
+        # see http://picamera.readthedocs.org/en/release-1.6/api.html#picamera.PiCamera.capture_continuous
         now = time.time()
         now_str = datetime.datetime.fromtimestamp(now).strftime('%Y%m%d_%H%M%S')
-
-        img_filenames = (
+        
+        # set filepaths to save captured images to
+        img_filenames = [
             'img_{}_{:02d}.png'.format(now_str, i) for i in range(NUM_IMAGES)
-            )            
+            ]
 
-        img_filepaths = (
-            os.path.join('/home/pi/projects/rats', fn) for fn in img_filenames
-            )
+        img_filepaths = [
+            os.path.join('/home/pi/projects/rats/img', fn) for fn in img_filenames
+            ]
 
+        # capture and save images
         with picamera.PiCamera() as camera:
             camera.resolution = RESOLUTION 
             camera.framerate = FRAME_RATE
@@ -67,6 +58,9 @@ def main():
 if __name__ == "__main__":
     try:
         main()
+
+    # somehow this code does not catch exceptions
+    # I think it worked before I added GPIO.wait_for_edge() in main()
     except KeyboardInterrupt, exc:
         cleanup_and_raise(exc)
     except Exception, exc:

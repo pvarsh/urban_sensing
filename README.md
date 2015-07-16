@@ -9,7 +9,9 @@ Urban sensing class team project
 
 ## Button IO
 
-Using [this](http://razzpisampler.oreilly.com/ch07.html) Raspberry Pi Cookbook tutorial. See [this image](http://www.megaleecher.net/sites/default/files/images/raspberry-pi-rev2-gpio-pinout.jpg) for Raspberry Pi 2 pin layout.
+- Using [this](http://razzpisampler.oreilly.com/ch07.html) Raspberry Pi Cookbook tutorial. See [this image](http://www.megaleecher.net/sites/default/files/images/raspberry-pi-rev2-gpio-pinout.jpg) for Raspberry Pi 2 pin layout.
+
+- Tried to implement [this multithread callback interrupts tutorial](http://raspi.tv/2013/how-to-use-interrupts-with-python-on-the-raspberry-pi-and-rpi-gpio-part-3) to have more control of camera, but having issues connecting to the web at the moment. It needs a newer version of `RPi.GPIO` library than what I have at the moment. More info on `wait_for_edge()` and `event_detected()` `GPIO` functions [here](http://sourceforge.net/p/raspberry-gpio-python/wiki/Inputs/)
 
 
 ## Notes on RPi setup
