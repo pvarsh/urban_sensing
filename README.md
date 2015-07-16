@@ -7,6 +7,15 @@ Urban sensing class team project
 - Juan Medina
 - Peter Varshavsky
 
+
+## Viewing images with SSH
+
+The only way I am able to view images when connecting to RPi with `ssh` is in ASCII art mode. To do this, install `FIM` (which stands for 'Fbi IMproved' where FBI stands for FrameBuffer Image viewing) with `sudo apt-get install fim`.
+
+To view images in ASCII art mode, run `fim -at <image.png>`.
+
+**TODO:** figure out how to do X-forwarding and view images for real through SSH. 
+
 ## Camera
 
 Currently capturing series of images. Camera can save to files or to byte stream. Camera docs are [here](http://picamera.readthedocs.org/en/release-1.6/api.html#picamera.PiCamera.capture_continuous) and some advanced recipes are [here](http://picamera.readthedocs.org/en/release-1.6/recipes2.html#rapid-capture-and-streaming).
