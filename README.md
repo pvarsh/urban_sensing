@@ -7,6 +7,14 @@ Urban sensing class team project
 - Juan Medina
 - Peter Varshavsky
 
+## Camera
+
+Currently capturing series of images. Camera can save to files or to byte stream. Camera docs are [here](http://picamera.readthedocs.org/en/release-1.6/api.html#picamera.PiCamera.capture_continuous) and some advanced recipes are [here](http://picamera.readthedocs.org/en/release-1.6/recipes2.html#rapid-capture-and-streaming).
+
+##### TODO:
+
+Get constant manually set exposure. Camera docs (link above) have that info.
+
 ## Button IO
 
 - Using [this](http://razzpisampler.oreilly.com/ch07.html) Raspberry Pi Cookbook tutorial. See [this image](http://www.megaleecher.net/sites/default/files/images/raspberry-pi-rev2-gpio-pinout.jpg) for Raspberry Pi 2 pin layout.
