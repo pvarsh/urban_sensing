@@ -60,21 +60,26 @@ def main():
     roiBox = None
 
     flag = True
+
+    # grab background
     (grabbed, p_frame) = camera.read()
+    p_frame_mean = p_frame.mean(axis=2)
+
+    # start dilatation, erosion and mass label
     bdilation = nd.morphology.binary_dilation
     berosion = nd.morphology.binary_erosion
     meas_label = nd.measurements.label
+
     # keep looping over the frames
     while True:
         # grab the current frame
         (grabbed, frame) = camera.read()
-        # if flag:
-        #     p_frame = frame
-        #     flag = False
-
-        p_frame_mean = p_frame.mean(axis=2)
         frame_mean = frame.mean(axis=2)
+
+        # compute difference
         diff = ((frame_mean - p_frame_mean) > 50) * 1.
+
+        # set size threshold
         sz_thr = 5000
         diff = bdilation(berosion(np.abs(diff)),iterations=2) * 1.
         labs = meas_label(diff)
@@ -88,7 +93,7 @@ def main():
                 contours,hierarchy = cv2.findContours(cnt, 1, 2)
                 cnt = contours[-1]
 
-                # enclosing rectangle
+                # enclosing rectangle - not used
                 # x,y,w,h = cv2.boundingRect(cnt)
                 # cv2.rectangle(frame,(x,y),(x+w,y+h),(0,255,0),1)
 
@@ -99,13 +104,6 @@ def main():
                 cv2.circle(frame,center,radius,(0,255,0),2)
 
                 rats += 1
-        print rats
-
-
-        # rect = cv2.minAreaRect(cnt)
-        # box = cv2.boxPoints(rect)
-        # box = np.int0(box)
-        # im = cv2.drawContours(diff,[box],0,(0,0,255),2)
 
         # check to see if we have reached the end of the
         # video
@@ -126,6 +124,7 @@ def main():
             cv2.polylines(frame, [pts], True, (0, 255, 0), 2)
 
         # show the frame and record if the user presses a key
+        print rats
         cv2.imshow("frame", frame)
         key = cv2.waitKey(1) & 0xFF
 
