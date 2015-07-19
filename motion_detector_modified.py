@@ -47,7 +47,10 @@ while True:
 
 	# resize the frame, convert it to grayscale, and blur it
 	frame = imutils.resize(frame, width=500)
+	#************** for first frame as ref *****************
 	frame_abs = imutils.resize(frame, width=500)
+	#*****************************************************************
+
 	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 	gray = cv2.GaussianBlur(gray, (21, 21), 0)
 
@@ -57,17 +60,19 @@ while True:
 		avg = gray.copy().astype("float")
 		continue
 
+	#************** for first frame as ref *****************
 	# if the first frame is None, initialize it
 	if firstFrame is None:
 		firstFrame = gray
 		continue
+	#*****************************************************************
 
 	# accumulate the weighted average between the current frame and
 	# previous frames, then compute the difference between the current
 	# frame and running average
 	cv2.accumulateWeighted(gray, avg, 0.5)
 	frameDelta = cv2.absdiff(gray, cv2.convertScaleAbs(avg))
-	# for first frame as reference
+	#************** for first frame as ref *****************
 	frameDelta_abs = cv2.absdiff(firstFrame, gray)
 	thresh_abs = cv2.threshold(frameDelta_abs, 25, 255, cv2.THRESH_BINARY)[1]
 
@@ -78,10 +83,11 @@ while True:
 	thresh = cv2.dilate(thresh, None, iterations=2)
 	(cnts, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
 		cv2.CHAIN_APPROX_SIMPLE)
-	# for first frame as ref
+	#************** for first frame as ref *****************
 	thresh_abs = cv2.dilate(thresh_abs, None, iterations=2)
 	(cnts_abs, _) = cv2.findContours(thresh_abs.copy(), cv2.RETR_EXTERNAL,
 		cv2.CHAIN_APPROX_SIMPLE)
+	#*****************************************************************
 
 	# loop over the contours
 	for c in cnts:
@@ -116,7 +122,7 @@ while True:
 	else:
 		motionCounter = 0
 
-	# for first frame as ref
+	#************** for first frame as ref *****************************
 	for cabs in cnts_abs:
 		# if the contour is too small, ignore it
 		if cv2.contourArea(cabs) < args["min_area"]:
@@ -131,7 +137,9 @@ while True:
 	# draw the text and timestamp on the frame
 	cv2.putText(frame_abs, "Room Status: {}".format(text), (10, 20),
 		cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+	#*****************************************************************
 
+	
 	# show the frame and record if the user presses a key
 	cv2.imshow("Average frame", frame)
 	cv2.imshow("Absolute frame", frame_abs)
