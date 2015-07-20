@@ -77,10 +77,10 @@ def main():
         frame_mean = frame.mean(axis=2)
 
         # compute difference
-        diff = ((frame_mean - p_frame_mean) > 50) * 1.
+        diff = ((-frame_mean + p_frame_mean) > 50) * 1.
 
         # set size threshold
-        sz_thr = 5000
+        sz_thr = 3000
         diff = bdilation(berosion(np.abs(diff)),iterations=2) * 1.
         labs = meas_label(diff)
 
@@ -94,14 +94,14 @@ def main():
                 cnt = contours[-1]
 
                 # enclosing rectangle - not used
-                # x,y,w,h = cv2.boundingRect(cnt)
-                # cv2.rectangle(frame,(x,y),(x+w,y+h),(0,255,0),1)
+                x,y,w,h = cv2.boundingRect(cnt)
+                cv2.rectangle(frame,(x,y),(x+w,y+h),(0,255,0),1)
 
                 # Enclosing circle
-                (x,y),radius = cv2.minEnclosingCircle(cnt)
-                center = (int(x),int(y))
-                radius = int(radius)
-                cv2.circle(frame,center,radius,(0,255,0),2)
+                # (x,y),radius = cv2.minEnclosingCircle(cnt)
+                # center = (int(x),int(y))
+                # radius = int(radius)
+                # cv2.circle(frame,center,radius,(0,255,0),2)
 
                 rats += 1
 
@@ -126,6 +126,7 @@ def main():
         # show the frame and record if the user presses a key
         print rats
         cv2.imshow("frame", frame)
+        cv2.imshow("diff", diff)
         key = cv2.waitKey(1) & 0xFF
 
         # handle if the 'i' key is pressed, then go into ROI
