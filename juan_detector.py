@@ -77,7 +77,10 @@ def main():
         frame_mean = frame.mean(axis=2)
 
         # compute difference
-        diff = ((-frame_mean + p_frame_mean) > 50) * 1.
+        if frame_mean.mean() > p_frame_mean.mean():
+            diff = ((frame_mean - p_frame_mean) > 50) * 1.
+        else:
+            diff = ((-frame_mean + p_frame_mean) > 50) * 1.
 
         # set size threshold
         sz_thr = 3000
