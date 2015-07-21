@@ -1,6 +1,7 @@
 from datetime import datetime
 from multiprocessing import Process, Pipe
 import os
+import requests
 import time
 
 import picamera
@@ -15,8 +16,8 @@ class RatDetector():
         self.resolution = (640, 480)
         self.framerate = 10
         # API parameters
-        # self.public_key = os.getenv('SPARKFUN_PUBLIC_KEY')
-        # self.private_key = os.getenv('SPARKFUN_PRIVATE_KEY')
+        self.public_key = os.getenv('SPARKFUN_PUBLIC_KEY')
+        self.private_key = os.getenv('SPARKFUN_PRIVATE_KEY')
 
     def _stream_images(self, conn):
         print "Initializing image generator..."
@@ -37,31 +38,23 @@ class RatDetector():
                     conn.send(frame.array)
                     # Empty buffer for next image
                     stream.truncate(0)
-        # Once stream ends, kill processing
-        print "Killing image generator..."
-        conn.send(False)
-        conn.close()
 
     def _process_images(self, conn):
         print "Initializing image processor..."
         count = 0
-        image = True
-        while image:
+        while True:
             image = conn.recv()
             count += 1
-            print "Processing item {0}, with dimensions: {1}".format(
-                count, image.shape)
-        
-        print "Killing image processor..."
-        conn.close()
-        return
+            print "[{0}] Processing item {1}, with dimensions: {2}".format(
+                datetime.now(), count, image.shape)
 
-    # def _upload data(self, conn):
-    #     url = 'http://data.sparkfun.com/input/{0}?private_key={1}&count={2}&timestamp={3}'.format(
-    #         self.public_key, 
-    #         self.private_key,
-    #         count,
-    #         datetime.now())
+    def _upload data(self, conn):
+        url = 'http://data.sparkfun.com/input/{0}?private_key={1}&count={2}&timestamp={3}'.format(
+            self.public_key, 
+            self.private_key,
+            count,
+            datetime.now().strftime("%Y-%m-%d+%H:%M:%S"))
+        requests.get(url)
 
     def run(self):
         try:
