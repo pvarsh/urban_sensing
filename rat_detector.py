@@ -1,5 +1,6 @@
-# from datetime import datetime
+from datetime import datetime
 from multiprocessing import Process, Pipe
+import os
 import time
 
 import picamera
@@ -10,8 +11,12 @@ class RatDetector():
     """A rat detector based on RPi image capture and analysis"""
 
     def __init__(self):
+        # Camera parameters
         self.resolution = (640, 480)
         self.framerate = 10
+        # API parameters
+        # self.public_key = os.getenv('SPARKFUN_PUBLIC_KEY')
+        # self.private_key = os.getenv('SPARKFUN_PRIVATE_KEY')
 
     def _stream_images(self, conn):
         print "Initializing image generator..."
@@ -40,15 +45,23 @@ class RatDetector():
     def _process_images(self, conn):
         print "Initializing image processor..."
         count = 0
-        try:
+        image = True
+        while image:
             image = conn.recv()
             count += 1
             print "Processing item {0}, with dimensions: {1}".format(
                 count, image.shape)
-        except:
-            print "Killing image processor..."
-            conn.close()
-            return
+        
+        print "Killing image processor..."
+        conn.close()
+        return
+
+    # def _upload data(self, conn):
+    #     url = 'http://data.sparkfun.com/input/{0}?private_key={1}&count={2}&timestamp={3}'.format(
+    #         self.public_key, 
+    #         self.private_key,
+    #         count,
+    #         datetime.now())
 
     def run(self):
         try:
