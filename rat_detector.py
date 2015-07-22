@@ -39,7 +39,7 @@ class RatDetector():
                     # Empty buffer for next image
                     stream.truncate(0)
 
-    def _process_images(self, conn):
+    def _process_images(self, conn, api_conn):
         print "Initializing image processor..."
         count = 0
         while True:
@@ -49,38 +49,47 @@ class RatDetector():
                 datetime.now(), count, image.shape)
 
             if (count % 10) == 0:
-                self._upload_data(0)
+                api_conn.send(count)
 
-    def _upload_data(self, count):
+    def _upload_data(self, conn):
+        print "Initializing data uploader..."
         url = 'https://data.sparkfun.com/input/{0}'.format(self.public_key)
         headers = {
             'Content-type': 'application/x-www-form-urlencoded',
             'Phant-Private-Key': self.private_key}
-        data = {
-            'count': count,
-            'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
-        requests.post(url, headers=headers, data=data)
+        while True:
+            count = conn.recv()
+            data = {
+                'count': count,
+                'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+            requests.post(url, headers=headers, data=data)
 
     def run(self):
         try:
             print "Initializing image pipeline..."
             # Define a one-way data pipe
             recv_conn, send_conn = Pipe(duplex=False)
-            # Define the two processes
+            recv_api, send_api = Pipe(duplex=False)
+            # Define the processes
             image_generator = Process(
                 target=self._stream_images, 
                 args=(send_conn,))
             image_processor = Process(
                 target=self._process_images, 
-                args=(recv_conn,))
-            # Start the two processes
+                args=(recv_conn, send_api))
+            data_uploader = Process(
+                target=self._upload_data, 
+                args=(recv_api,))
+            # Start the processes
             image_generator.start()
             image_processor.start()
+            data_uploader.start()
         except:
             print "Killing image pipeline..."
-            # End the two processes
+            # End the processes
             image_generator.join()
             image_processor.join()
+            data_uploader.join()
             return
 
 
