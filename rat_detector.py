@@ -7,7 +7,7 @@ import time
 import picamera
 import picamera.array
 
-
+        
 class RatDetector():
     """A rat detector based on RPi image capture and analysis"""
 
@@ -52,12 +52,14 @@ class RatDetector():
                 self._upload_data(0)
 
     def _upload_data(self, count):
-        url = 'http://data.sparkfun.com/input/{0}?private_key={1}&count={2}&timestamp={3}'.format(
-            self.public_key, 
-            self.private_key,
-            count,
-            datetime.now().strftime("%Y-%m-%d+%H:%M:%S"))
-        requests.get(url)
+        url = 'https://data.sparkfun.com/input/{0}'.format(self.public_key)
+        headers = {
+            'Content-type': 'application/x-www-form-urlencoded',
+            'Phant-Private-Key': self.private_key}
+        data = {
+            'count': count
+            'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+        requests.post(url, headers=headers, data=data)
 
     def run(self):
         try:
