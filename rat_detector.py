@@ -57,7 +57,7 @@ class RatDetector():
             'Content-type': 'application/x-www-form-urlencoded',
             'Phant-Private-Key': self.private_key}
         data = {
-            'count': count
+            'count': count,
             'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
         requests.post(url, headers=headers, data=data)
 
