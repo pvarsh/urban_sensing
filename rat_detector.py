@@ -48,7 +48,10 @@ class RatDetector():
             print "[{0}] Processing item {1}, with dimensions: {2}".format(
                 datetime.now(), count, image.shape)
 
-    def _upload data(self, conn):
+            if (count % 10) == 0:
+                self._upload_data(0)
+
+    def _upload_data(self, count):
         url = 'http://data.sparkfun.com/input/{0}?private_key={1}&count={2}&timestamp={3}'.format(
             self.public_key, 
             self.private_key,
