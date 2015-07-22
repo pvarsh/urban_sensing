@@ -9,9 +9,9 @@ from RPi import GPIO
 # set some constants
 LED_PIN = 4
 BUTTON_PIN = 18
-NUM_IMAGES = 6
-FRAME_RATE = 2
-RESOLUTION = (1024, 768)
+NUM_IMAGES = 120
+FRAME_RATE = 15
+RESOLUTION = (800, 600)
 
 def cleanup_and_raise(exc):
     print("\nCleaning up GPIO")
@@ -37,7 +37,7 @@ def main():
         # see http://picamera.readthedocs.org/en/release-1.6/api.html#picamera.PiCamera.capture_continuous
         now = time.time()
         now_str = datetime.datetime.fromtimestamp(now).strftime('%Y%m%d_%H%M%S')
-        
+        print("Files will have this timestamp: {}".format(now_str)) 
         # set filepaths to save captured images to
         img_filenames = [
             'img_{}_{:02d}.png'.format(now_str, i) for i in range(NUM_IMAGES)
@@ -52,7 +52,7 @@ def main():
             camera.resolution = RESOLUTION 
             camera.framerate = FRAME_RATE
             GPIO.output(LED_PIN, True)
-            camera.capture_sequence(img_filepaths)
+            camera.capture_sequence(img_filepaths, use_video_port=True)
             GPIO.output(LED_PIN, False)
 
 if __name__ == "__main__":
