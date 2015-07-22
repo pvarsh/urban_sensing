@@ -3,11 +3,12 @@ from multiprocessing import Process, Pipe
 import os
 import requests
 import time
-
+from juan_detector import rat_detector
+import scipy.ndimage as nd
 import picamera
 import picamera.array
 
-        
+
 class RatDetector():
     """A rat detector based on RPi image capture and analysis"""
 
@@ -42,12 +43,31 @@ class RatDetector():
     def _process_images(self, conn, api_conn):
         print "Initializing image processor..."
         count = 0
-        while True:
-            image = conn.recv()
-            count += 1
-            print "[{0}] Processing item {1}, with dimensions: {2}".format(
-                datetime.now(), count, image.shape)
+        bdilation = nd.morphology.binary_dilation
+        berosion = nd.morphology.binary_erosion
+        meas_label = nd.measurements.label
 
+        while True:
+            frame = conn.recv()
+            # initialize and update background
+            if count == 0:
+                self.background = frame.mean(axis=2)
+            else:
+                self.background += frame.mean(axis=2)
+                self.background /= 2
+
+            print "[{0}] Processing item {1}".format(
+                datetime.now(), count)
+
+            stop = rat_detector(grabbed=True,
+                                frame=frame,
+                                background=self.background,
+                                bdilation=bdilation,
+                                berosion=berosion,
+                                meas_label=meas_label)
+            if stop:
+                break
+            count += 1
             if (count % 10) == 0:
                 api_conn.send(count)
 
@@ -72,13 +92,13 @@ class RatDetector():
             recv_api, send_api = Pipe(duplex=False)
             # Define the processes
             image_generator = Process(
-                target=self._stream_images, 
+                target=self._stream_images,
                 args=(send_conn,))
             image_processor = Process(
-                target=self._process_images, 
+                target=self._process_images,
                 args=(recv_conn, send_api))
             data_uploader = Process(
-                target=self._upload_data, 
+                target=self._upload_data,
                 args=(recv_api,))
             # Start the processes
             image_generator.start()

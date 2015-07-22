@@ -12,7 +12,8 @@ import cv2
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-v", "--video", help="path to the video file")
-ap.add_argument("-a", "--min-area", type=int, default=200, help="minimum area size")
+ap.add_argument(
+    "-a", "--min-area", type=int, default=200, help="minimum area size")
 args = vars(ap.parse_args())
 
 # if the video argument is None, then we are reading from webcam
@@ -138,7 +139,6 @@ while True:
     cv2.putText(frame_abs, "Room Status: {}".format(text), (10, 20),
         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
     #*****************************************************************
-
 
     # show the frame and record if the user presses a key
     cv2.imshow("Average frame", frame)

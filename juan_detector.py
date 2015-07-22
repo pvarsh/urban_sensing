@@ -10,27 +10,6 @@ import os
 import glob
 import time
 
-# initialize the current frame of the video, along with the list of
-# ROI points along with whether or not this is input mode
-frame = None
-roiPts = []
-inputMode = False
-
-
-def selectROI(event, x, y, flags, param):
-    # grab the reference to the current frame, list of ROI
-    # points and whether or not it is ROI selection mode
-    global roiPts, inputMode
-
-    # if we are in ROI selection mode, the mouse was clicked,
-    # and we do not already have four points, then update the
-    # list of ROI points with the (x, y) location of the click
-    # and draw the circle
-    if inputMode and event == cv2.EVENT_LBUTTONDOWN and len(roiPts) < 4:
-        roiPts.append((x, y))
-        cv2.circle(frame, (x, y), 4, (0, 255, 0), 2)
-        cv2.imshow("frame", frame)
-
 
 def main():
     # construct the argument parse and parse the arguments
@@ -54,7 +33,7 @@ def main():
 
 
 def _if_images(frames_path):
-    """If ist images
+    """If list of images
     """
     # read images
     frames_paths = [p for p in glob.glob(frames_path)]
@@ -113,24 +92,27 @@ def rat_detector(frame, background,
                  bdilation, berosion, meas_label, grabbed=True):
     """This function detects rat within img"""
 
+    # set binarizing threshold value
     th = 15
-    # setup the mouse callback
-    # cv2.namedWindow("frame")
 
     # compute gray_scale
     frame_mean = frame.mean(axis=2)
 
+    # compute difference
     diff = ((frame_mean - background) > th) * 1.
-    # cv2.imshow("diff", diff)
 
-    # set size threshold
+    # set size threshold for blobs size
     sz_thr = th + 5
-    diff = bdilation(berosion(np.abs(diff), iterations=2),
-                     iterations=20) * 1.
-    labs = meas_label(diff)
-    cv2.imshow("diff2", diff)
+    diff = bdilation(berosion(np.abs(diff),
+                     iterations=2), iterations=20) * 1.
 
+    # label blobs
+    labs = meas_label(diff)
+
+    # reset diff
     diff[:] = 0
+
+    # just candidate blobs to diff
     rats = 0
     for lab in range(1, labs[1] + 1):
         if 1. * (labs[0] == lab).sum() > sz_thr:
@@ -149,7 +131,7 @@ def rat_detector(frame, background,
     if not grabbed:
         return True
 
-    # show the frame and record if the user presses a key
+    # display number of rats
     cv2.putText(frame, "Rats in Scene: {}".format(rats), (10, 20),
         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 
