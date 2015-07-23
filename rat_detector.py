@@ -1,9 +1,11 @@
 from datetime import datetime
 from multiprocessing import Process, Pipe
 import os
-import requests
 import time
-from juan_detector import rat_detector
+
+import cv2
+import numpy as np
+import requests
 import scipy.ndimage as nd
 import picamera
 import picamera.array
@@ -14,7 +16,7 @@ class RatDetector():
 
     def __init__(self):
         # Camera parameters
-        self.resolution = (640, 480)
+        self.resolution = (600, 400)
         self.framerate = 10
         # API parameters
         self.public_key = os.getenv('SPARKFUN_PUBLIC_KEY')
@@ -48,27 +50,53 @@ class RatDetector():
         meas_label = nd.measurements.label
 
         while True:
-            frame = conn.recv()
             # initialize and update background
+            frame = conn.recv()
             if count == 0:
-                self.background = frame.mean(axis=2)
+                background = frame.mean(axis=2)
             else:
-                self.background += frame.mean(axis=2)
-                self.background /= 2
+                background += frame.mean(axis=2)
+                background /= 2
+            # Set binarizing threshold value
+            th = 15
+            # Compute gray scale image
+            frame_mean = frame.mean(axis=2)
+            # Compute difference
+            diff = ((frame_mean - background) > th) * 1.
+            # Set size threshold for blobs size
+            sz_thr = th + 5
+            diff = bdilation(
+                berosion(
+                    np.abs(diff),
+                    iterations=2), 
+                iterations=20) * 1.0
+            # Label blobs
+            labs = meas_label(diff)
+            # Reset diff
+            diff[:] = 0
+            # Just candidate blobs to diff
+            rats = 0
+            for lab in range(1, labs[1] + 1):
+                if 1. * (labs[0] == lab).sum() > sz_thr:
+                    rats += 1
+                    diff += (labs[0] == lab) * 1.0
+                    cnt = ((labs[0] == lab) * 255).astype(np.uint8)
+                    contours, hierarchy = cv2.findContours(cnt, 1, 2)
+                    cnt = contours[-1]
+                    # enclosing rectangle - not used
+                    x, y, w, h = cv2.boundingRect(cnt)
+                    cv2.rectangle(
+                        frame, 
+                        (x, y), 
+                        (x + w, y + h), 
+                        (0, 255, 0), 
+                        1)
 
             print "[{0}] Processing item {1}".format(
-                datetime.now(), count)
+                datetime.now(), rats)
 
-            stop = rat_detector(grabbed=True,
-                                frame=frame,
-                                background=self.background,
-                                bdilation=bdilation,
-                                berosion=berosion,
-                                meas_label=meas_label)
-            if stop:
-                break
             count += 1
-            if (count % 10) == 0:
+            if (count % 300) == 0:
                 api_conn.send(count)
 
     def _upload_data(self, conn):
