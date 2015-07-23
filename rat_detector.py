@@ -17,7 +17,7 @@ class RatDetector():
     def __init__(self):
         # Camera parameters
         self.resolution = (600, 400)
-        self.framerate = 10
+        self.framerate = 2
         # API parameters
         self.public_key = os.getenv('SPARKFUN_PUBLIC_KEY')
         self.private_key = os.getenv('SPARKFUN_PRIVATE_KEY')
@@ -92,12 +92,12 @@ class RatDetector():
                         (0, 255, 0), 
                         1)
 
-            print "[{0}] Processing item {1}".format(
+            print "[{0}] Rats in image: {1}".format(
                 datetime.now(), rats)
 
             count += 1
-            if (count % 300) == 0:
-                api_conn.send(count)
+            if (count % 60) == 0:
+                api_conn.send(rats)
 
     def _upload_data(self, conn):
         print "Initializing data uploader..."
