@@ -1,5 +1,6 @@
 # urban_sensing
-Urban sensing class team project
+
+Urban sensing class team project. We build a "rat detector" prototype with a Raspberry Pi. The detector uses background subtraction to identify moving objects in a video stream and counts them.
 
 ### Team
 - Emil Christensen
